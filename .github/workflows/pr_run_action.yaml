@@ -1,3 +1,5 @@
+name: Run action on example project
+
 on:
   pull_request:
     types:
@@ -5,6 +7,11 @@ on:
       - synchronize
       - labeled
       - reopened
+    paths:
+      - 'tests/project/**'
+      - '.github/workflows/pr_run_action.yaml'
+      - 'action.yaml'
+      - 'src/**'
 jobs:
   run-action:
     runs-on: ubuntu-latest
