@@ -58,10 +58,6 @@ runs:
       #language=bash
       run: |
         ${{ github.action_path }}/src/install_poetry.sh ${{ inputs.poetry-version }}
-
-        which poetry
-
-        poetry show -v 2>/dev/null
     - name: Check Poetry virtualenv
       id: check-poetry-virtualenv
       shell: bash
@@ -71,6 +67,7 @@ runs:
         poetry_virtualenv=$(poetry show -v 2>/dev/null \
           | grep -E '^Using virtualenv: ' \
           | sed -E 's/Using virtualenv: (.*)/\1/g' \
+          || echo
         )
         echo "poetry-virtualenv-location=${poetry_virtualenv}" >>$GITHUB_OUTPUT
         echo "POETRY_VIRTUALENV_LOCATION=${poetry_virtualenv}" >>$GITHUB_ENV
