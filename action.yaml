@@ -84,4 +84,4 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       #language=bash
       run: |
-        poetry install --no-interraction --no-root
+        poetry install --no-interaction --no-root
