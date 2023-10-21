@@ -32,4 +32,5 @@ jobs:
         working-directory: tests/project
         #language=bash
         run: |
+          poetry install
           poetry run pytest tests
