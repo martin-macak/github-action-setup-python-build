@@ -98,7 +98,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       #language=bash
       run: |
-        read -r domain_owner domain repository <<<"${{ inputs.repo-aws-codeartifact }}"
+        IFS='/' read -r domain_owner domain repository <<<"${{ inputs.repo-aws-codeartifact }}"
+
         aws codeartifact login \
           --tool pip \
           --domain-owner "${domain_owner}" \
