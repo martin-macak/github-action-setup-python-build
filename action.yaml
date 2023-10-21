@@ -57,7 +57,9 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       #language=bash
       run: |
-        ${{ github.action_path }}/src/install_poetry.sh
+        ${{ github.action_path }}/src/install_poetry.sh ${{ inputs.poetry-version }}
+
+        which poetry
     - name: Check Poetry virtualenv
       id: check-poetry-virtualenv
       shell: bash
