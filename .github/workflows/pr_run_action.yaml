@@ -1,0 +1,36 @@
+name: Run action on example project
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - labeled
+      - reopened
+    paths:
+      - 'tests/project/**'
+      - '.github/workflows/pr_run_action.yaml'
+      - 'action.yaml'
+      - 'src/**'
+jobs:
+  run-action:
+    runs-on: ubuntu-latest
+    name: Run action
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup python
+        uses: ./
+        with:
+          working-directory: tests/project
+      - name: Build
+        working-directory: tests/project
+        #language=bash
+        run: |
+          poetry build
+      - name: Test
+        working-directory: tests/project
+        #language=bash
+        run: |
+          poetry install
+          poetry run pytest tests

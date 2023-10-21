@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "project"
+version = "0.1.0"
+description = ""
+authors = ["Martin Macak <martin.macak@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "example", from = "./src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyyaml = "^6.0.1"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
