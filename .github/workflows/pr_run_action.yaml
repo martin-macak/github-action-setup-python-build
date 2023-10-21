@@ -11,4 +11,4 @@ jobs:
     name: Run action
     steps:
       - name: Setup python
-        uses: ./action.yaml
+        uses: ./
