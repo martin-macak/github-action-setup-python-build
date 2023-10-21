@@ -60,6 +60,8 @@ runs:
         ${{ github.action_path }}/src/install_poetry.sh ${{ inputs.poetry-version }}
 
         which poetry
+
+        poetry show -v 2>/dev/null
     - name: Check Poetry virtualenv
       id: check-poetry-virtualenv
       shell: bash
