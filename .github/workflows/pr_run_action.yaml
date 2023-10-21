@@ -34,3 +34,8 @@ jobs:
         run: |
           poetry install
           poetry run pytest tests
+      - name: Twine test
+        working-directory: tests/project
+        #language=bash
+        run: |
+          poetry run twine --version

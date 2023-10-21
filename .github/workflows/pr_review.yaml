@@ -1,0 +1,19 @@
+name: PR Review
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  commit-check:
+    name: Commit check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Checks
+        uses: pre-commit/action@v3.0.0
+        with:
+          extra_args: --config .pre-commit-config-ci.yaml
