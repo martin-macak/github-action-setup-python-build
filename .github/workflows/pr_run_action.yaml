@@ -23,3 +23,11 @@ jobs:
         uses: ./
         with:
           working-directory: tests/project
+      - name: Build
+        working-directory: tests/project
+        run: |
+          poetry build
+      - name: Test
+        working-directory: tests/project
+        run: |
+          poetry run pytest tests
