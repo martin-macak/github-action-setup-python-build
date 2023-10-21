@@ -1,0 +1,87 @@
+name: setup-python-build
+description: >
+  Setup Python environment for building and testing
+
+inputs:
+  working-directory:
+    description: 'The working directory to use'
+    required: false
+    default: '.'
+  python-version:
+    description: 'The version of Python to use'
+    required: false
+    default: '3.10'
+  poetry-version:
+    description: 'The version of Poetry to use'
+    required: false
+    default: '1.5.1'
+  poetry-cache-installation:
+    description: 'Whether to cache the Poetry installation'
+    required: false
+    default: 'true'
+  poetry-auto-install:
+    description: 'Whether to automatically install dependencies'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup environment
+      id: setup-env
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      #language=bash
+      run:
+        ${{ github.action_path }}/src/setup_env.sh
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+    - name: Load cached Poetry installation
+      id: cached-poetry
+      if: |
+        (steps.check-env.outputs.system-poetry-version == '' || steps.check-env.outputs.system-poetry-version < inputs.poetry-version ) &&
+        inputs.poetry-cache-installation == 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.setup-env.outputs.poetry-home }}
+        key: poetry/installation/${{ runner.os }}/${{ inputs.poetry-version }}
+    - name: Install Poetry
+      id: install-poetry
+      if: |
+        (steps.check-env.outputs.system-poetry-version == '' || steps.check-env.outputs.system-poetry-version < inputs.poetry-version ) &&
+        inputs.poetry-cache-installation == 'true' &&
+        steps.cached-poetry.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      #language=bash
+      run: |
+        ${{ github.action_path }}/src/install_poetry.sh
+    - name: Check Poetry virtualenv
+      id: check-poetry-virtualenv
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      #language=bash
+      run: |
+        poetry_virtualenv=$(poetry show -v 2>/dev/null \
+          | grep -E '^Using virtualenv: ' \
+          | sed -E 's/Using virtualenv: (.*)/\1/g' \
+        )
+        echo "poetry-virtualenv-location=${poetry_virtualenv}" >>$GITHUB_OUTPUT
+        echo "POETRY_VIRTUALENV_LOCATION=${poetry_virtualenv}" >>$GITHUB_ENV
+    - name: Load Poetry virtualenv from cache
+      id: cached-poetry-virtualenv
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.check-poetry-virtualenv.outputs.poetry-virtualenv-location }}
+        key: poetry/virtualenv/${{ runner.os }}/${{ inputs.poetry-version }}/${{ hashFiles('**/poetry.lock') }}
+    - name: Install Poetry dependencies
+      id: install-poetry-dependencies
+      if: inputs.poetry-auto-install == 'true' && steps.cached-poetry-virtualenv.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      #language=bash
+      run: |
+        poetry install --no-interraction --no-root

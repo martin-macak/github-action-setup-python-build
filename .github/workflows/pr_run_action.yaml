@@ -1,0 +1,14 @@
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - labeled
+      - reopened
+jobs:
+  run-action:
+    runs-on: ubuntu-latest
+    name: Run action
+    steps:
+      - name: Setup python
+        uses: ./action.yaml
