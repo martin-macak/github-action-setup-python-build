@@ -23,6 +23,20 @@ inputs:
     description: 'Whether to automatically install dependencies'
     required: false
     default: 'true'
+  repo-aws-codeartifact:
+    description: |
+      The AWS CodeArtifact repository to use
+      If set to disabled, CodeArtifact won't be used
+      CodeArtifact is configured with following configuration string:
+        {domain-owner}/{domain}/{repository}
+
+      Example:
+        00000000000000/myorg/pypi
+
+      When you use this setting, this actions expects that AWS credentials have been already
+      assumed properly, ideally via aws-actions/configure-aws-credentials action.
+    required: false
+    default: 'disabled'
 
 runs:
   using: composite
@@ -77,6 +91,30 @@ runs:
       with:
         path: ${{ steps.check-poetry-virtualenv.outputs.poetry-virtualenv-location }}
         key: poetry/virtualenv/${{ runner.os }}/${{ inputs.poetry-version }}/${{ hashFiles('**/poetry.lock') }}
+    - name: 'Setup Repo: CodeArtifact'
+      id: setup-repo-codeartifact
+      if: inputs.repo-aws-codeartifact != 'disabled'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      #language=bash
+      run: |
+        read -r domain_owner domain repository <<<"${{ inputs.repo-aws-codeartifact }}"
+        aws codeartifact login \
+          --tool pip \
+          --domain-owner "${domain_owner}" \
+          --domain "${domain}" \
+          --repository "${repository}"
+
+        export POETRY_HTTP_BASIC_CODEARTIFACT_USERNAME=aws
+        export POETRY_HTTP_BASIC_CODEARTIFACT_PASSWORD=$(aws codeartifact get-authorization-token \
+          --domain-owner "${domain_owner}" \
+          --domain "${domain}" \
+          --query 'authorizationToken' \
+          --output text\
+        )
+        echo "POETRY_VIRTUALENVS_PATH=$POETRY_VIRTUALENVS_PATH" >> $GITHUB_ENV
+        echo "POETRY_HTTP_BASIC_CODEARTIFACT_USERNAME=$POETRY_HTTP_BASIC_CODEARTIFACT_USERNAME" >> $GITHUB_ENV
+        echo "POETRY_HTTP_BASIC_CODEARTIFACT_PASSWORD=$POETRY_HTTP_BASIC_CODEARTIFACT_PASSWORD" >> $GITHUB_ENV
     - name: Install Poetry dependencies
       id: install-poetry-dependencies
       if: inputs.poetry-auto-install == 'true' && steps.cached-poetry-virtualenv.outputs.cache-hit != 'true'
