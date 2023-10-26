@@ -106,6 +106,12 @@ runs:
           --domain "${domain}" \
           --repository "${repository}"
 
+        aws codeartifact login \
+          --tool twine \
+          --domain-owner "${domain_owner}" \
+          --domain "${domain}" \
+          --repository "${repository}"
+
         export POETRY_HTTP_BASIC_CODEARTIFACT_USERNAME=aws
         export POETRY_HTTP_BASIC_CODEARTIFACT_PASSWORD=$(aws codeartifact get-authorization-token \
           --domain-owner "${domain_owner}" \
