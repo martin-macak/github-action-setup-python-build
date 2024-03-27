@@ -57,7 +57,7 @@ runs:
       if: |
         (steps.check-env.outputs.system-poetry-version == '' || steps.check-env.outputs.system-poetry-version < inputs.poetry-version ) &&
         inputs.poetry-cache-installation == 'true'
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.setup-env.outputs.poetry-home }}
         key: poetry/installation/${{ runner.os }}/${{ inputs.poetry-version }}
@@ -87,7 +87,7 @@ runs:
         echo "POETRY_VIRTUALENV_LOCATION=${poetry_virtualenv}" >>$GITHUB_ENV
     - name: Load Poetry virtualenv from cache
       id: cached-poetry-virtualenv
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.check-poetry-virtualenv.outputs.poetry-virtualenv-location }}
         key: poetry/virtualenv/${{ runner.os }}/${{ inputs.poetry-version }}/${{ hashFiles('**/poetry.lock') }}
